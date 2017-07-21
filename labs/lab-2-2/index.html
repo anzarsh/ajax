@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<title>Книги по категориям</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Language" content="ru" />
+	<link rel="stylesheet" type="text/css" href="lab-2-2.css" />
+	<!--<script type="text/javascript" src="../xmlhttprequest.js"></script>-->
+	<script type="text/javascript">
+		/*
+		**
+		** Задание 1. Код вставлять сюда
+		**
+		*/
+        var fillCatigories = function(){
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function(){
+                var select = document.getElementById("selCategory");
+                var options;
+
+                if(request.readyState == 4){
+                    if(request.status == 200){
+                        options = request.responseText.split("\n");
+                        for(var i = 0; i<options.length-1; i++){
+
+                            select.add(new Option(options[i].split(":")[1], options[i].split(":")[0]), null);
+                        }
+                    }
+                }
+            };
+            request.open("GET", "getcategories.php", true);
+            request.send();
+        };
+
+        // При завершении загрузки страницы
+        window.onload = function(){
+            fillCatigories();
+        }
+
+
+		/*
+		**
+		**	Задание 2. Выборка книг 
+		**
+		*/
+		var tableBooks = function(books){
+		    var table = document.getElementById("tableBooks");
+			for (var i=0; i<books.length; i++){
+                var author = document.createTextNode(books[i][0]);
+                var name = document.createTextNode(books[i][1]);
+                var author_td = document.createElement("td");
+                author_td.appendChild(author);
+                var name_td = document.createElement("td");
+                name_td.appendChild(name);
+                var tr = document.createElement("tr");
+                tr.setAttribute("data-img", books[i][2]);
+                tr.setAttribute("onclick", "check_add_img(this)");
+                tr.appendChild(author_td);
+                tr.appendChild(name_td);
+                table.appendChild(tr);
+            }
+		};
+
+
+		function showBooks(){
+			var request = new XMLHttpRequest();
+			var str = "cat=" + document.getElementById("selCategory").selectedIndex;
+			request.onreadystatechange = function(){
+			    if(request.readyState == 4 && request.status == 200){
+			        var books = request.responseText.split("\n");
+			        for (var i = 0; i<books.length; i++){
+			            books[i] = books[i].split("|");
+					}
+                    tableBooks(books);
+				}
+			};
+			request.open("POST", "postbooksbycat.php", true);
+			request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			request.send(str);
+		}
+		
+		
+		/*
+		**
+		**	Задание 3. Показ изображений
+		**
+		*/
+		var img;
+		function check_add_img(e){
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function(){
+                var bookInfo = document.querySelector("#divBookInfo > img");
+                if(request.readyState == 4 && request.status == 200){
+                    bookInfo.src = "/images/"+img;
+                    bookInfo.alt = request.getResponseHeader("Content-Length");
+                    bookInfo.parentNode.style.display = "block";
+				} else {
+                    bookInfo.parentNode.style.display = "";
+				}
+			};
+            img = e.getAttribute("data-img");
+            request.open("HEAD", "../../images/" + img, true);
+            request.send(null);
+		}
+
+	</script>
+</head>
+<body>
+	<h1>Книги по категориям</h1>
+	<form action="#" onsubmit="return false">
+		<div>
+			<label for="selCategory">Категория</label>
+			<select id="selCategory"></select>
+			<button onclick="showBooks()">Показать</button>
+		</div>
+		
+		<div id="divBookInfo">
+			<img src="" alt="" />
+		</div>			
+	</form>
+	
+	<table id="tableBooks"></table>
+	
+
+	
+</body>
+</html>
+

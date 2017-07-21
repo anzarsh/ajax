@@ -1,0 +1,23 @@
+<meta charset="utf-8">
+<script>
+const willGift = new Promise(
+    (resolve, reject) => {
+        let win = Math.random().toFixed(1);
+        if(win>.5)
+            resolve("Ты выиграл!");
+        else
+            reject("Ты неудачник");
+    }
+);
+const buyTicket = function(){
+    willGift
+        .then(result => console.log(result))
+        .catch(error => console.log(error));
+};
+buyTicket();
+
+
+var searchString = "title="+title+"&"+"author="+author;
+req.open("POST, "searchbook.php, true);
+req.send(searchString);
+</script>
