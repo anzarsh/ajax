@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Language" content="ru" />
 	<link rel="stylesheet" type="text/css" href="lab-3.css" />
-	<script type="text/javascript" src="../xmlhttprequest.js"></script>
+	<!-- <script type="text/javascript" src="../xmlhttprequest.js"></script> -->
 	<script type="text/javascript" src="json2.js"></script>
 	<script type="text/javascript">
 		// Класс UserInfo
@@ -28,7 +28,26 @@
 		**	Задание 1. Отображение формы
 		**
 		*/
-		function showLoginForm(){}
+		window.onload = function(){
+			document.querySelector(".mask").addEventListener("click", function(e){
+				hideLoginForm();
+			});
+			var showForm = document.getElementById("showLoginForm");
+			showForm.addEventListener("click", function(e){
+				e.stopPropagation();
+				showLoginForm();
+			});
+		};
+		function showLoginForm(){
+			var form = document.getElementById("frmLogin");
+			form.style.display = "block";
+			document.querySelector(".mask").classList.add("on");
+		}
+		function hideLoginForm(){
+			document.querySelector(".mask").classList.remove("on");
+			var form = document.getElementById("frmLogin");
+			form.style.display = "";
+		}
 		
 		/*
 		**
@@ -40,10 +59,42 @@
 		var ticket;
 		
 		// Функция проверки пользователя
-		function validateUser(){}
+		function validateUser(){
+
+			var login = document.getElementById("txtLogin");
+			var pass = document.getElementById("txtPassword");
+			var user = new UserInfo();
+			user.login = login.value;
+			user.password = pass.value;
+			var userSend = JSON.stringify(user);
+			
+			var request = new XMLHttpRequest();
+			request.onreadystatechange = function(){
+				if(request.readyState == 4){
+					if(request.status == 200){
+						ticket = JSON.parse(request.responseText);
+						if(!ticket.valid){
+							var divMessage = document.getElementById("divMessage");
+							divMessage.style.display = "block";
+						} else {
+							hideLoginForm();
+							showOnLineUsers();
+						}
+					} else {
+						alert(request.status);
+					}
+				} 
+			};
+			request.open("POST", "user_auth.php", true);
+			request.setRequestHeader("Content-Type", "text/plain");
+			request.send(userSend);
+		}
 
 		// Функция гашения сообщения об ошибке
-		function hideErrorMessage() {}
+		function hideErrorMessage() {
+			var divMessage = document.getElementById("divMessage");
+			divMessage.style.display = "";
+		}
 
 		
 		/*
@@ -52,7 +103,28 @@
 		**
 		*/
 		
-		function showOnLineUsers() {}
+		function showOnLineUsers() {
+			var onlineUsers = document.querySelector("#divUsers > ul");
+			var ticketSend = JSON.stringify(ticket);
+			var usersOnline = new XMLHttpRequest();
+			usersOnline.onreadystatechange = function(){
+				if(usersOnline.readyState == 4 && usersOnline.status == 200){
+					var users = JSON.parse(usersOnline.responseText);
+					onlineUsers.innerHTML = "";
+					for(var i=0; i<users.length; i++){
+						var txt = document.createTextNode(users[i].name);
+						var li = document.createElement("li");
+						li.appendChild(txt);
+						onlineUsers.appendChild(li);
+					}
+					console.log(usersOnline.responseText);
+					setInterval("showOnLineUsers()", 10000);
+				}
+			};
+			usersOnline.open("POST", "get_online_users.php", true);
+			usersOnline.setRequestHeader("Content-Type", "text-plain");
+			usersOnline.send(ticketSend);
+		}
 
 		
 	</script>
@@ -82,7 +154,7 @@
 	<!-- Панель списка пользователей -->
 	<div id="divUsers" class="block">
 		<h2>Пользователи на сайте</h2>
-		<button onclick="showLoginForm()">Вход</button>
+		<button id="showLoginForm">Вход</button>
 		<ul></ul>
 	</div>
 	
@@ -93,6 +165,7 @@
 		<li><img src='../../images/1000653244.jpg'>
 				<img src='../../images/1000372094.jpg'></li>
 	</ul>
+	<div class="mask"></div>
 </body>
 </html>
 

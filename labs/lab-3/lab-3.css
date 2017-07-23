@@ -21,10 +21,12 @@
 {
 	position: absolute;
 	top: 10%;
-	left: 30%;
+	left: 50%;
+	margin-left: -7.5em;
 	width: 15em;
 	background-color: white;
 	display: none;
+	z-index: 3;
 }
 
 #frmLogin div
@@ -76,4 +78,23 @@
 dl
 {
 	margin-right: 55%;
+}
+
+/*.mask{
+	position: relative;
+}*/
+
+.mask{
+	display: none;
+}
+
+.mask.on{
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0,0,0,0.3);
 }
